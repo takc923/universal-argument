@@ -103,8 +103,8 @@ class UniversalArgumentAction : EditorAction(Handler()) {
 
                 val answer = when {
                     targetTimes < 1000 -> Messages.OK
-                    else -> Messages.showDialog("This operation can hang up",
-                            "Are you sure?",
+                    else -> Messages.showDialog("Are you sure?",
+                            "This operation can hang up",
                             arrayOf(Messages.OK_BUTTON, Messages.CANCEL_BUTTON),
                             1,
                             Messages.getWarningIcon(),
