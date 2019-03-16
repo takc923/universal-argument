@@ -14,20 +14,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
     internal class Handler : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
             if (!ourActionsRegistered) {
-                val actionManager = EditorActionManager.getInstance()
-
-                val typedAction = actionManager.typedAction
-                typedAction.setupRawHandler(MyTypedHandler(typedAction.rawHandler))
-
-                for (action in supportedActions) {
-                    val handler = actionManager.getActionHandler(action)
-                    when (handler) {
-                        is EditorWriteActionHandler -> actionManager.setActionHandler(action, MyEditorWriteActionHandler(handler))
-                        is PasteHandler -> actionManager.setActionHandler(action, MyPasteActionHandler(handler))
-                        else -> actionManager.setActionHandler(action, MyEditorActionHandler(handler))
-                    }
-                }
-                actionManager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, MyEscapeEditorActionHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE)))
+                registerActions()
                 ourActionsRegistered = true
             }
             count = 0
@@ -50,38 +37,19 @@ class UniversalArgumentAction : EditorAction(Handler()) {
         }
 
         class MyEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
-            public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                if (isEnabled) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
-                else myOriginalHandler.execute(editor, caret, dataContext)
-            }
-
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
-                    isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         class MyEditorWriteActionHandler(private val myOriginalHandler: EditorWriteActionHandler) : EditorWriteActionHandler() {
-            override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                if (isEnabled) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
-                else myOriginalHandler.execute(editor, caret, dataContext)
-            }
-
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
-                    isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
-
         class MyPasteActionHandler(private val myOriginalHandler: PasteHandler) : PasteHandler(myOriginalHandler) {
-            override fun execute(editor: Editor?, dataContext: DataContext?, producer: Producer<Transferable>?) {
-                myOriginalHandler.execute(editor, dataContext, producer)
-            }
-
-            override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                if (isEnabled) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
-                else myOriginalHandler.execute(editor, caret, dataContext)
-            }
-
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
-                    isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            override fun execute(editor: Editor?, dataContext: DataContext?, producer: Producer<Transferable>?) = myOriginalHandler.execute(editor, dataContext, producer)
+            override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         class MyEscapeEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
@@ -101,6 +69,35 @@ class UniversalArgumentAction : EditorAction(Handler()) {
             private var ourActionsRegistered = false
             private var isEnabled = false
             private var count = 0
+
+            private fun repeatAction(action: (kotlin.Int) -> kotlin.Unit) {
+                isEnabled = false
+                if (count == 0) count = 4
+                repeat(count) { action.invoke(it) }
+                count = 0
+            }
+
+            private fun myDoExecute(myOriginalHandler: EditorActionHandler, editor: Editor, caret: Caret?, dataContext: DataContext) =
+                    if (isEnabled) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
+                    else myOriginalHandler.execute(editor, caret, dataContext)
+
+            private fun registerActions() {
+                val actionManager = EditorActionManager.getInstance()
+
+                val typedAction = actionManager.typedAction
+                typedAction.setupRawHandler(MyTypedHandler(typedAction.rawHandler))
+
+                for (action in supportedActions) {
+                    val handler = actionManager.getActionHandler(action)
+                    when (handler) {
+                        is EditorWriteActionHandler -> actionManager.setActionHandler(action, MyEditorWriteActionHandler(handler))
+                        is PasteHandler -> actionManager.setActionHandler(action, MyPasteActionHandler(handler))
+                        else -> actionManager.setActionHandler(action, MyEditorActionHandler(handler))
+                    }
+                }
+                actionManager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, MyEscapeEditorActionHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE)))
+            }
+
             private val supportedActions = listOf(
                     IdeActions.ACTION_EDITOR_CUT,
                     IdeActions.ACTION_EDITOR_PASTE,
@@ -146,13 +143,6 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                     IdeActions.ACTION_EDITOR_DUPLICATE,
                     IdeActions.ACTION_EDITOR_DUPLICATE_LINES
             )
-
-            private fun repeatAction(action: (kotlin.Int) -> kotlin.Unit) {
-                isEnabled = false
-                if (count == 0) count = 4
-                repeat(count) { action.invoke(it) }
-                count = 0
-            }
         }
     }
 }
