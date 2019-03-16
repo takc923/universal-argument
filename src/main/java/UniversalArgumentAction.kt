@@ -17,68 +17,90 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                 registerActions()
                 ourActionsRegistered = true
             }
-            count = 0
-            isEnabled = true
+
+            if (state.isEnabled() && count > 0) {
+                state = State.ENABLED_AFTER_NUM_INPUT
+            } else {
+                count = 0
+                state = State.ENABLED
+            }
         }
 
         class MyTypedHandler(originalHandler: TypedActionHandler?) : TypedActionHandlerBase(originalHandler) {
             override fun execute(editor: Editor, charTyped: Char, dataContext: DataContext) {
-                if (isEnabled) doUniversalArgument(charTyped, editor, dataContext)
-                else myOriginalHandler?.execute(editor, charTyped, dataContext)
-            }
-
-            private fun doUniversalArgument(charTyped: Char, editor: Editor, dataContext: DataContext) {
-                if (charTyped.isDigit()) {
+                if (charTyped.isDigit() && !state.isEnabledAfterNumInput()) {
                     count = charTyped.toString().toInt() + count * 10
                     HintManager.getInstance().showInformationHint(editor, "$count")
-                } else repeatAction { myOriginalHandler?.execute(editor, charTyped, dataContext) }
-
+                } else if (state.isEnabled()) {
+                    repeatAction { myOriginalHandler?.execute(editor, charTyped, dataContext) }
+                } else {
+                    myOriginalHandler?.execute(editor, charTyped, dataContext)
+                }
             }
+
         }
 
         class MyEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
             override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = state.isEnabled() || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         class MyEditorWriteActionHandler(private val myOriginalHandler: EditorWriteActionHandler) : EditorWriteActionHandler() {
             override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = state.isEnabled() || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         class MyPasteActionHandler(private val myOriginalHandler: PasteHandler) : PasteHandler(myOriginalHandler) {
             override fun execute(editor: Editor?, dataContext: DataContext?, producer: Producer<Transferable>?) = myOriginalHandler.execute(editor, dataContext, producer)
             override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = state.isEnabled() || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         class MyEscapeEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                if (isEnabled) {
-                    isEnabled = false
+                if (state.isEnabled()) {
+                    state = State.DISABLED
                     count = 0
-                } else myOriginalHandler.execute(editor, caret, dataContext)
+                } else {
+                    myOriginalHandler.execute(editor, caret, dataContext)
+                }
             }
 
             override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
-                    isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+                    state.isEnabled() || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
 
         companion object {
             private var ourActionsRegistered = false
-            private var isEnabled = false
             private var count = 0
+            private var state = State.DISABLED
+
+            enum class State {
+                ENABLED {
+                    override fun isEnabled(): Boolean = true
+
+                },
+                ENABLED_AFTER_NUM_INPUT {
+                    override fun isEnabled(): Boolean = true
+                },
+                DISABLED {
+                    override fun isEnabled(): Boolean = false
+                };
+
+                abstract fun isEnabled(): Boolean
+                fun isEnabledAfterNumInput(): Boolean = this == ENABLED_AFTER_NUM_INPUT
+            }
 
             private fun repeatAction(action: (kotlin.Int) -> kotlin.Unit) {
-                isEnabled = false
+                state = State.DISABLED
                 if (count == 0) count = 4
                 repeat(count) { action.invoke(it) }
                 count = 0
             }
 
             private fun myDoExecute(myOriginalHandler: EditorActionHandler, editor: Editor, caret: Caret?, dataContext: DataContext) =
-                    if (isEnabled) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
+                    if (state.isEnabled()) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
                     else myOriginalHandler.execute(editor, caret, dataContext)
 
             private fun registerActions() {
