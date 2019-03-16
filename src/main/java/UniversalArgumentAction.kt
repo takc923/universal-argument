@@ -19,10 +19,10 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                 ourActionsRegistered = true
             }
 
-            if (state.isEnabled() && count > 0) {
+            if (state.isEnabled() && repeatTimes > 0) {
                 state = State.ENABLED_AFTER_NUM_INPUT
             } else {
-                count = 0
+                repeatTimes = 0
                 state = State.ENABLED
             }
         }
@@ -32,8 +32,8 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                 when {
                     state.isDisabled() -> myOriginalHandler?.execute(editor, charTyped, dataContext)
                     charTyped.isDigit() && !state.isEnabledAfterNumInput() -> {
-                        count = charTyped.toString().toInt() + count * 10
-                        HintManager.getInstance().showInformationHint(editor, "$count")
+                        repeatTimes = charTyped.toString().toInt() + repeatTimes * 10
+                        HintManager.getInstance().showInformationHint(editor, "$repeatTimes")
                     }
                     else -> repeatAction { myOriginalHandler?.execute(editor, charTyped, dataContext) }
                 }
@@ -61,7 +61,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 if (state.isEnabled()) {
                     state = State.DISABLED
-                    count = 0
+                    repeatTimes = 0
                 } else {
                     myOriginalHandler.execute(editor, caret, dataContext)
                 }
@@ -74,7 +74,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
 
         companion object {
             private var ourActionsRegistered = false
-            private var count = 0
+            private var repeatTimes = 0
             private var state = State.DISABLED
 
             enum class State {
@@ -95,14 +95,14 @@ class UniversalArgumentAction : EditorAction(Handler()) {
 
             private fun repeatAction(action: (kotlin.Int) -> kotlin.Unit) {
                 state = State.DISABLED
-                val targetCount = when (count) {
+                val targetTimes = when (repeatTimes) {
                     0 -> 4
-                    else -> count
+                    else -> repeatTimes
                 }
-                count = 0
+                repeatTimes = 0
 
                 val answer = when {
-                    targetCount < 1000 -> Messages.OK
+                    targetTimes < 1000 -> Messages.OK
                     else -> Messages.showDialog("This operation can hang up",
                             "Are you sure?",
                             arrayOf(Messages.OK_BUTTON, Messages.CANCEL_BUTTON),
@@ -111,7 +111,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                             null)
                 }
 
-                if (answer == Messages.OK) repeat(targetCount) { action.invoke(it) }
+                if (answer == Messages.OK) repeat(targetTimes) { action.invoke(it) }
             }
 
             private fun myDoExecute(myOriginalHandler: EditorActionHandler, editor: Editor, caret: Caret?, dataContext: DataContext) =
