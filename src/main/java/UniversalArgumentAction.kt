@@ -22,6 +22,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                 for (action in supportedActions) {
                     actionManager.setActionHandler(action, MyEditorActionHandler(actionManager.getActionHandler(action)))
                 }
+                actionManager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, MyEscapeEditorActionHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE)))
                 ourActionsRegistered = true
             }
             count = 0
@@ -48,6 +49,18 @@ class UniversalArgumentAction : EditorAction(Handler()) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 if (isEnabled) repeatUniversalArgument { myOriginalHandler.execute(editor, caret, dataContext) }
                 else myOriginalHandler.execute(editor, caret, dataContext)
+            }
+
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
+                    isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+        }
+
+        class MyEscapeEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
+            public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
+                if (isEnabled) {
+                    isEnabled = false
+                    count = 0
+                } else myOriginalHandler.execute(editor, caret, dataContext)
             }
 
             override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
