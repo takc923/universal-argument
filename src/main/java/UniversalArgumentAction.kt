@@ -40,14 +40,14 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                     count = charTyped.toString().toInt() + count * 10
                     HintManager.getInstance().showInformationHint(editor, "$count")
                 }
-                else repeatUniversalArgument { myOriginalHandler?.execute(editor, charTyped, dataContext) }
+                else repeatAction { myOriginalHandler?.execute(editor, charTyped, dataContext) }
 
             }
         }
 
         class MyEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                if (isEnabled) repeatUniversalArgument { myOriginalHandler.execute(editor, caret, dataContext) }
+                if (isEnabled) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
                 else myOriginalHandler.execute(editor, caret, dataContext)
             }
 
@@ -118,7 +118,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                     IdeActions.ACTION_EDITOR_DUPLICATE_LINES
             )
 
-            private fun repeatUniversalArgument(action: (kotlin.Int) -> kotlin.Unit) {
+            private fun repeatAction(action: (kotlin.Int) -> kotlin.Unit) {
                 isEnabled = false
                 if (count == 0) count = 4
                 repeat(count) { action.invoke(it) }
