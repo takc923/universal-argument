@@ -28,13 +28,13 @@ class UniversalArgumentAction : EditorAction(Handler()) {
 
         class MyTypedHandler(originalHandler: TypedActionHandler?) : TypedActionHandlerBase(originalHandler) {
             override fun execute(editor: Editor, charTyped: Char, dataContext: DataContext) {
-                if (charTyped.isDigit() && !state.isEnabledAfterNumInput()) {
-                    count = charTyped.toString().toInt() + count * 10
-                    HintManager.getInstance().showInformationHint(editor, "$count")
-                } else if (state.isEnabled()) {
-                    repeatAction { myOriginalHandler?.execute(editor, charTyped, dataContext) }
-                } else {
-                    myOriginalHandler?.execute(editor, charTyped, dataContext)
+                when {
+                    state.isDisabled() -> myOriginalHandler?.execute(editor, charTyped, dataContext)
+                    charTyped.isDigit() && !state.isEnabledAfterNumInput() -> {
+                        count = charTyped.toString().toInt() + count * 10
+                        HintManager.getInstance().showInformationHint(editor, "$count")
+                    }
+                    else -> repeatAction { myOriginalHandler?.execute(editor, charTyped, dataContext) }
                 }
             }
 
@@ -79,7 +79,6 @@ class UniversalArgumentAction : EditorAction(Handler()) {
             enum class State {
                 ENABLED {
                     override fun isEnabled(): Boolean = true
-
                 },
                 ENABLED_AFTER_NUM_INPUT {
                     override fun isEnabled(): Boolean = true
@@ -89,6 +88,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                 };
 
                 abstract fun isEnabled(): Boolean
+                fun isDisabled(): Boolean = !isEnabled()
                 fun isEnabledAfterNumInput(): Boolean = this == ENABLED_AFTER_NUM_INPUT
             }
 
