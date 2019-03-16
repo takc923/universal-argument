@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.*
+import com.intellij.openapi.ui.Messages
 import com.intellij.util.Producer
 import java.awt.datatransfer.Transferable
 
@@ -94,9 +95,23 @@ class UniversalArgumentAction : EditorAction(Handler()) {
 
             private fun repeatAction(action: (kotlin.Int) -> kotlin.Unit) {
                 state = State.DISABLED
-                if (count == 0) count = 4
-                repeat(count) { action.invoke(it) }
+                val targetCount = when (count) {
+                    0 -> 4
+                    else -> count
+                }
                 count = 0
+
+                val answer = when {
+                    targetCount < 1000 -> Messages.OK
+                    else -> Messages.showDialog("This operation can hang up",
+                            "Are you sure?",
+                            arrayOf(Messages.OK_BUTTON, Messages.CANCEL_BUTTON),
+                            1,
+                            Messages.getWarningIcon(),
+                            null)
+                }
+
+                if (answer == Messages.OK) repeat(targetCount) { action.invoke(it) }
             }
 
             private fun myDoExecute(myOriginalHandler: EditorActionHandler, editor: Editor, caret: Caret?, dataContext: DataContext) =
