@@ -1,13 +1,13 @@
+import com.intellij.codeInsight.editorActions.PasteHandler
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.template.impl.editorActions.TypedActionHandlerBase
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.actionSystem.EditorAction
-import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
-import com.intellij.openapi.editor.actionSystem.TypedActionHandler
+import com.intellij.openapi.editor.actionSystem.*
+import com.intellij.util.Producer
+import java.awt.datatransfer.Transferable
 
 class UniversalArgumentAction : EditorAction(Handler()) {
 
@@ -20,7 +20,12 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                 typedAction.setupRawHandler(MyTypedHandler(typedAction.rawHandler))
 
                 for (action in supportedActions) {
-                    actionManager.setActionHandler(action, MyEditorActionHandler(actionManager.getActionHandler(action)))
+                    val handler = actionManager.getActionHandler(action)
+                    when (handler) {
+                        is EditorWriteActionHandler -> actionManager.setActionHandler(action, MyEditorWriteActionHandler(handler))
+                        is PasteHandler -> actionManager.setActionHandler(action, MyPasteActionHandler(handler))
+                        else -> actionManager.setActionHandler(action, MyEditorActionHandler(handler))
+                    }
                 }
                 actionManager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, MyEscapeEditorActionHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE)))
                 ourActionsRegistered = true
@@ -39,14 +44,38 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                 if (charTyped.isDigit()) {
                     count = charTyped.toString().toInt() + count * 10
                     HintManager.getInstance().showInformationHint(editor, "$count")
-                }
-                else repeatAction { myOriginalHandler?.execute(editor, charTyped, dataContext) }
+                } else repeatAction { myOriginalHandler?.execute(editor, charTyped, dataContext) }
 
             }
         }
 
         class MyEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
+                if (isEnabled) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
+                else myOriginalHandler.execute(editor, caret, dataContext)
+            }
+
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
+                    isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+        }
+
+        class MyEditorWriteActionHandler(private val myOriginalHandler: EditorWriteActionHandler) : EditorWriteActionHandler() {
+            override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
+                if (isEnabled) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
+                else myOriginalHandler.execute(editor, caret, dataContext)
+            }
+
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
+                    isEnabled || myOriginalHandler.isEnabled(editor, caret, dataContext)
+        }
+
+
+        class MyPasteActionHandler(private val myOriginalHandler: PasteHandler) : PasteHandler(myOriginalHandler) {
+            override fun execute(editor: Editor?, dataContext: DataContext?, producer: Producer<Transferable>?) {
+                myOriginalHandler.execute(editor, dataContext, producer)
+            }
+
+            override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 if (isEnabled) repeatAction { myOriginalHandler.execute(editor, caret, dataContext) }
                 else myOriginalHandler.execute(editor, caret, dataContext)
             }
