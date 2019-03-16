@@ -32,5 +32,10 @@ intellij {
     updateSinceUntilBuild false
 }
 patchPluginXml {
-    changeNotes """<p>Initial release</p>"""
+    changeNotes """
+<ul>
+  <li>Escape to cancel</li>
+  <li>C-u -> num1 -> C-u -> num2 to repeat num2 num1 times</li>
+</ul>
+"""
 }
