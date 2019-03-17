@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'io.github.takc923'
-version '0.4-SNAPSHOT'
+version '0.4'
 
 sourceCompatibility = 1.8
 
@@ -31,8 +31,14 @@ intellij {
     version '2018.3'
     updateSinceUntilBuild false
 }
+
 patchPluginXml {
     changeNotes """
+<p>v0.4</p>
+<ul>
+  <li>Support more editor action</li>
+  <li>Fix bug that prevent to repeat Enter</li>
+</ul>
 <p>v0.3</p>
 <ul>
   <li>Show dialog if repeat count is too large</li>
