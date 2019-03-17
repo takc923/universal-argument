@@ -44,18 +44,18 @@ class UniversalArgumentAction : EditorAction(Handler()) {
 
         class MyEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
             override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = state.isEnabled() || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         class MyEditorWriteActionHandler(private val myOriginalHandler: EditorWriteActionHandler) : EditorWriteActionHandler() {
             override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = state.isEnabled() || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         class MyPasteActionHandler(private val myOriginalHandler: PasteHandler) : PasteHandler(myOriginalHandler) {
             override fun execute(editor: Editor?, dataContext: DataContext?, producer: Producer<Transferable>?) = myOriginalHandler.execute(editor, dataContext, producer)
             override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = state.isEnabled() || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         class MyEscapeEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
