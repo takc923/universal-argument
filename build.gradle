@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'io.github.takc923'
-version '0.4'
+version '0.5'
 
 sourceCompatibility = 1.8
 
@@ -34,6 +34,10 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+<p>v0.5</p>
+<ul>
+  <li>Prevent typed char from appearing for a moment</li>
+</ul>
 <p>v0.4</p>
 <ul>
   <li>Support more editor action</li>
