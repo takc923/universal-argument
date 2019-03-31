@@ -40,6 +40,9 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                 }
             }
 
+            override fun beforeExecute(editor: Editor, c: Char, context: DataContext, plan: ActionPlan) {
+                if (myOriginalHandler is TypedActionHandlerEx && state.isDisabled()) myOriginalHandler.beforeExecute(editor, c, context, plan)
+            }
         }
 
         class MyEditorActionHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
