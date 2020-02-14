@@ -50,13 +50,11 @@ class UniversalArgumentAction : EditorAction(Handler()) {
             override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
-        class MyEditorWriteActionHandler(private val myOriginalHandler: EditorWriteActionHandler) : EditorWriteActionHandler() {
-            override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = myOriginalHandler.isEnabled(editor, caret, dataContext)
-        }
-
-        class MyPasteActionHandler(private val myOriginalHandler: PasteHandler) : PasteHandler(myOriginalHandler) {
-            override fun execute(editor: Editor?, dataContext: DataContext?, producer: Producer<Transferable>?) = myOriginalHandler.execute(editor, dataContext, producer)
+        class MyPasteActionHandler(private val myOriginalHandler: EditorActionHandler) : PasteHandler(myOriginalHandler) {
+            override fun execute(editor: Editor?, dataContext: DataContext?, producer: Producer<Transferable>?) = when (myOriginalHandler) {
+                is EditorTextInsertHandler -> myOriginalHandler.execute(editor, dataContext, producer)
+                else -> Unit
+            }
             override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) = myDoExecute(myOriginalHandler, editor, caret, dataContext)
             override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean = myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
@@ -136,8 +134,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                     val newHandler = when {
                         action is UniversalArgumentAction -> null
                         actionId == IdeActions.ACTION_EDITOR_ESCAPE -> MyEscapeEditorActionHandler(handler)
-                        handler is EditorWriteActionHandler -> MyEditorWriteActionHandler(handler)
-                        handler is PasteHandler -> MyPasteActionHandler(handler)
+                        actionId == IdeActions.ACTION_EDITOR_PASTE -> MyPasteActionHandler(handler)
                         handler is EditorActionHandler -> MyEditorActionHandler(handler)
                         else -> null
                     }
