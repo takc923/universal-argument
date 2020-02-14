@@ -28,7 +28,7 @@ dependencies {
 }
 
 intellij {
-    version '2019.1'
+    version '2019.3'
     updateSinceUntilBuild false
 }
 
