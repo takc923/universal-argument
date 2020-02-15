@@ -75,6 +75,9 @@ class UniversalArgumentAction : EditorAction(Handler()) {
 
 
         companion object {
+            @Suppress("MemberVisibilityCanBePrivate")
+            const val ACTION_UNIVERSAL_ARGUMENT = "UniversalArgumentAction"
+
             private var ourActionsRegistered = false
             private var repeatCount = 0
             private var state = State.DISABLED
@@ -132,7 +135,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                     val action = actionManager.getAction(actionId) as? EditorAction ?: continue
                     val handler = action.handler
                     val newHandler = when {
-                        action is UniversalArgumentAction -> null
+                        actionId == ACTION_UNIVERSAL_ARGUMENT -> null
                         actionId == IdeActions.ACTION_EDITOR_ESCAPE -> MyEscapeEditorActionHandler(handler)
                         actionId == IdeActions.ACTION_EDITOR_PASTE -> MyPasteActionHandler(handler)
                         handler is EditorActionHandler -> MyEditorActionHandler(handler)
