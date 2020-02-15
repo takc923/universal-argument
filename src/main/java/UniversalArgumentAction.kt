@@ -95,7 +95,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                 fun isEnabledAfterNumInput(): Boolean = this == ENABLED_AFTER_NUM_INPUT
             }
 
-            private fun repeatAction(action: (kotlin.Int) -> kotlin.Unit) {
+            private fun repeatAction(action: (Int) -> Unit) {
                 state = State.DISABLED
                 val targetRepeatCount = when (repeatCount) {
                     0 -> 4
