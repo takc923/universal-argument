@@ -34,6 +34,10 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+<p>v0.6</p>
+<ul>
+  <li>Fix a bug that occurred when used with A</li>
+</ul>
 <p>v0.5</p>
 <ul>
   <li>Prevent typed char from appearing for a moment</li>
