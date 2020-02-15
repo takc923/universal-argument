@@ -9,7 +9,7 @@
     ]]></description>
 
     <depends>com.intellij.modules.lang</depends>
-    <idea-version since-build="183" />
+    <idea-version since-build="193.1784" />
 
     <actions>
         <action id="UniversalArgumentAction" class="UniversalArgumentAction" text="universal-argument" description="Repeat editor action">

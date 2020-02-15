@@ -126,7 +126,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
             private fun registerActions() {
                 val editorActionManager = EditorActionManager.getInstance()
 
-                val typedAction = editorActionManager.typedAction
+                val typedAction = TypedAction.getInstance()
                 typedAction.setupRawHandler(MyTypedHandler(typedAction.rawHandler))
 
                 val actionManager = ActionManager.getInstance()
