@@ -36,7 +36,7 @@ patchPluginXml {
     changeNotes """
 <p>v0.6</p>
 <ul>
-  <li>Fix a bug that occurred when used with A</li>
+  <li>Fix a bug that occurred when used with some plugins</li>
 </ul>
 <p>v0.5</p>
 <ul>
