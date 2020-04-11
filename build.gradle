@@ -34,6 +34,11 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+<p>v0.9</p>
+<ul>
+  <li>Support only 2020.1+</li>
+  <li>Remove deprecated codes</li>
+</ul>
 <p>v0.8</p>
 <ul>
   <li>Support only 193.1784+</li>
