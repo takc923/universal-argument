@@ -12,7 +12,7 @@ repositories {
 }
 
 intellij {
-    version.set("2023.3.5")
+    version.set("2023.1")
     updateSinceUntilBuild.set(false)
     pluginName.set("universal-argument")
 }
