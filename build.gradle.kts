@@ -1,40 +1,33 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23"
-    }
-}
-
 plugins {
-    id 'java'
-    id 'org.jetbrains.intellij' version '1.17.2'
+    id("java")
+    id("org.jetbrains.kotlin.jvm") version "1.9.22"
+    id("org.jetbrains.intellij") version "1.17.2"
 }
 
-apply plugin: 'kotlin'
-
-group 'io.github.takc923'
-version '0.8-SNAPSHOT'
-
-sourceCompatibility = 17
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "17"
-}
-
+group = "io.github.takc923"
+version = "0.8-SNAPSHOT"
 
 repositories {
     mavenCentral()
 }
 
 intellij {
-    version = '2021.1'
-    updateSinceUntilBuild = false
+    version.set("2023.3.5")
+    updateSinceUntilBuild.set(false)
+    pluginName.set("universal-argument")
 }
 
-patchPluginXml {
-    changeNotes = """
+tasks {
+    withType<JavaCompile> {
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
+    }
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = "17"
+    }
+
+    patchPluginXml {
+        changeNotes = """
 <p>v0.8</p>
 <ul>
   <li>Support only 193.1784+</li>
@@ -67,4 +60,5 @@ patchPluginXml {
   <li>C-u -> num1 -> C-u -> num2 to repeat num2 num1 times</li>
 </ul>
 """
+    }
 }
