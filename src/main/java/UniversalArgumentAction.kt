@@ -51,7 +51,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
         }
 
         class MyPasteActionHandler(private val myOriginalHandler: EditorActionHandler) : PasteHandler(myOriginalHandler) {
-            override fun execute(editor: Editor?, dataContext: DataContext?, producer: Producer<Transferable>?) = when (myOriginalHandler) {
+            override fun execute(editor: Editor, dataContext: DataContext, producer: Producer<out Transferable>?) = when (myOriginalHandler) {
                 is EditorTextInsertHandler -> myOriginalHandler.execute(editor, dataContext, producer)
                 else -> Unit
             }
