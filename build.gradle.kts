@@ -28,6 +28,12 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("231")
+        pluginDescription.set(
+            """
+            <p>universal-argument implements universal-argument of emacs</p>
+            <p>Type C-u, input number, then input something. It repeats the "something" specified times</p>
+            """.trimIndent()
+        )
         changeNotes = """
 <p>v0.8</p>
 <ul>
