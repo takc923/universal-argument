@@ -3,13 +3,7 @@
     <name>universal-argument</name>
     <vendor url="https://github.com/takc923/universal-argument">takc923</vendor>
 
-    <description><![CDATA[
-    <p>universal-argument implements universal-argument of emacs</p>
-    <p>Type C-u, input number, then input something. It repeats the "something" specified times</p>
-    ]]></description>
-
     <depends>com.intellij.modules.lang</depends>
-    <idea-version since-build="211" />
     <actions>
         <action id="UniversalArgumentAction" class="UniversalArgumentAction" text="universal-argument" description="Repeat editor action">
             <keyboard-shortcut first-keystroke="ctrl U" keymap="Mac OS X 10.5+"/>
