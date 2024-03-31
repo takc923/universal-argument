@@ -41,7 +41,10 @@ class UniversalArgumentAction : EditorAction(Handler()) {
             }
 
             override fun beforeExecute(editor: Editor, c: Char, context: DataContext, plan: ActionPlan) {
-                if (myOriginalHandler is TypedActionHandlerEx && state.isDisabled()) myOriginalHandler.beforeExecute(editor, c, context, plan)
+                val handlerEx = myOriginalHandler as? TypedActionHandlerEx ?: return
+                if (state.isEnabledAfterNumInput()) {
+                    handlerEx.beforeExecute(editor, c, context, plan)
+                }
             }
         }
 
@@ -110,7 +113,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                     targetRepeatCount < 1000 -> Messages.OK
                     else -> Messages.showDialog("Are you sure?",
                             "This operation can hang up",
-                            arrayOf(Messages.OK_BUTTON, Messages.CANCEL_BUTTON),
+                            arrayOf(Messages.getOkButton(), Messages.getCancelButton()),
                             1,
                             Messages.getWarningIcon(),
                             null)
@@ -131,7 +134,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
 
                 val actionManager = ActionManager.getInstance()
 
-                for (actionId in actionManager.getActionIds("")) {
+                for (actionId in actionManager.getActionIdList("")) {
                     val action = actionManager.getAction(actionId) as? EditorAction ?: continue
                     val handler = action.handler
                     val newHandler = when {
