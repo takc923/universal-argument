@@ -113,7 +113,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
                     targetRepeatCount < 1000 -> Messages.OK
                     else -> Messages.showDialog("Are you sure?",
                             "This operation can hang up",
-                            arrayOf(Messages.OK_BUTTON, Messages.CANCEL_BUTTON),
+                            arrayOf(Messages.getOkButton(), Messages.getCancelButton()),
                             1,
                             Messages.getWarningIcon(),
                             null)
