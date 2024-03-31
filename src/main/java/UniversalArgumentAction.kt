@@ -41,7 +41,10 @@ class UniversalArgumentAction : EditorAction(Handler()) {
             }
 
             override fun beforeExecute(editor: Editor, c: Char, context: DataContext, plan: ActionPlan) {
-                if (myOriginalHandler is TypedActionHandlerEx && state.isDisabled()) myOriginalHandler.beforeExecute(editor, c, context, plan)
+                val handlerEx = myOriginalHandler as? TypedActionHandlerEx ?: return
+                if (state.isEnabledAfterNumInput()) {
+                    handlerEx.beforeExecute(editor, c, context, plan)
+                }
             }
         }
 
