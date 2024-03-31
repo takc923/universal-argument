@@ -134,7 +134,7 @@ class UniversalArgumentAction : EditorAction(Handler()) {
 
                 val actionManager = ActionManager.getInstance()
 
-                for (actionId in actionManager.getActionIds("")) {
+                for (actionId in actionManager.getActionIdList("")) {
                     val action = actionManager.getAction(actionId) as? EditorAction ?: continue
                     val handler = action.handler
                     val newHandler = when {
