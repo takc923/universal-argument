@@ -6,8 +6,8 @@
     <depends>com.intellij.modules.lang</depends>
     <actions>
         <action id="UniversalArgumentAction" class="UniversalArgumentAction" text="universal-argument" description="Repeat editor action">
-            <keyboard-shortcut first-keystroke="ctrl U" keymap="Mac OS X 10.5+"/>
-            <keyboard-shortcut first-keystroke="ctrl U" keymap="Mac OS X"/>
+            <keyboard-shortcut first-keystroke="ctrl U" keymap="Mac OS X 10.5+" replace-all="true"/>
+            <keyboard-shortcut first-keystroke="ctrl U" keymap="Mac OS X" replace-all="true"/>
             <keyboard-shortcut first-keystroke="ctrl U" keymap="$default"/>
         </action>
     </actions>
