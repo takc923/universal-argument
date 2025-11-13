@@ -1,7 +1,10 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "1.9.22"
-    id("org.jetbrains.intellij") version "1.17.2"
+    kotlin("jvm") version "2.1.21"
+    id("org.jetbrains.intellij.platform") version "2.10.4"
 }
 
 group = "io.github.takc923"
@@ -9,33 +12,47 @@ version = "0.10-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
-intellij {
-    version.set("2023.1")
-    updateSinceUntilBuild.set(false)
-    pluginName.set("universal-argument")
+dependencies {
+    intellijPlatform {
+        intellijIdeaCommunity("2025.2.1")
+    }
 }
 
-tasks {
-    withType<JavaCompile> {
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
     }
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
-    }
+}
 
-    patchPluginXml {
-        sinceBuild.set("231")
-        pluginDescription.set(
-            """
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        id = "io.github.takc923.universal-argument"
+        name = "universal-argument"
+        version = project.version.toString()
+        vendor {
+            name = "takc923"
+            url = "https://github.com/takc923/universal-argument"
+        }
+        ideaVersion {
+            sinceBuild = "252"
+        }
+        description = """
             <p>universal-argument implements universal-argument of emacs</p>
             <p>Type C-u, input number, then input something. It repeats the "something" specified times</p>
-            """.trimIndent()
-        )
-        changeNotes.set(
-            """
+        """.trimIndent()
+        changeNotes = """
             <p>v0.8</p>
             <ul>
               <li>Support only 193.1784+</li>
@@ -67,7 +84,12 @@ tasks {
               <li>Escape to cancel</li>
               <li>C-u -> num1 -> C-u -> num2 to repeat num2 num1 times</li>
             </ul>
-            """.trimIndent()
-        )
+        """.trimIndent()
+    }
+
+    pluginVerification {
+        ides {
+            recommended()
+        }
     }
 }
